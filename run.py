@@ -1,10 +1,11 @@
 from slack_bolt import App
 from slack_bolt.adapter.socket_mode import SocketModeHandler
 import re
+import os
 import subprocess  #他のpythonファイルを実行する
 
-SLACK_BOT_TOKEN="xoxb-4395843400308-4400294354372-LNlCOg6UCPAzASw0VOZgA0gt"
-SLACK_APP_TOKEN="xapp-1-A04B98BJK5M-4397730105715-fc65e82b38f7c6e42d1d1e6f3b0086f8e18b7cafac0cd34727c421c675bef213"
+SLACK_BOT_TOKEN="xoxb-4395843400308-4400294354372-QCzh2A8lIizvv1xw4kmBd6zc"
+SLACK_APP_TOKEN="xapp-1-A04B98BJK5M-4401321535252-627d24072fb24e2d9f38260fc98d5a25f0007b9b4aa93c4d6914b6727a7acdca"
 
 
 app = App(token=SLACK_BOT_TOKEN)
@@ -20,8 +21,8 @@ def message_hello(message, say):
                 "text": {"type": "mrkdwn", "text": f"Hey there in block1 <@{message['user']}>!"},
                 "accessory": {
                     "type": "button",
-                    "text": {"type": "plain_text", "text":"Click button1"},
-                    "action_id": "button_click1"
+                    "text": {"type": "plain_text", "text":"scheduleを呼び出す"},
+                    "action_id": "schedule"
                 }
             }
         ],
@@ -42,12 +43,64 @@ def message_hello(message, say):
         text=f"Hey there <@{message['user']}>!"
     )
 
-@app.action("button_click1")
-def action_button_click(body, ack, say):
+@app.action("schedule")
+def action_button_click(message, ack, body, say):
     # アクションを確認したことを即時で応答します
     ack()
     # チャンネルにメッセージを投稿します
-    say(f"<@{body['user']['id']}> clicked the button1")
+    say(
+        blocks=[
+            {
+                "type": "section",
+                "text": {"type": "mrkdwn", "text": f"Hey there in block1 <@{body['user']['id']}!"},
+                "accessory": {
+                    "type": "button",
+                    "text": {"type": "plain_text", "text":"予定を追加する"},
+                    "action_id": "add_schedule"
+                }
+            }
+        ],
+        text=f"Hey there !"
+    )
+    say(
+        blocks=[
+            {
+                "type": "section",
+                "text": {"type": "mrkdwn", "text": f"Hey there in block2 <@{body['user']['id']}!"},
+                "accessory": {
+                    "type": "button",
+                    "text": {"type": "plain_text", "text":"予定を削除する"},
+                    "action_id": "delete_schedule"
+                }
+            }
+        ],
+        text=f"Hey there !"
+    )
+
+@app.action("add_schedule")
+def add_schedule(message, ack, say, body, event):
+    # アクションを確認したことを即時で応答します
+    ack()
+    #チャンネルにメッセージを送信
+    #say(f"<@{body['user']['id']}> add new schedule")
+    say(f"<@{body['user']['id']}>")
+    say(os.listdir("data"))
+    name = f"<@{body['user']['id']}>"
+    path_w = './'+name[2:-1] + 'schedule.txt'
+    with open(path_w, mode='w', encoding='UTF-8') as f:
+         f.write("aaa")
+
+
+@app.action("delete_schedule")
+def delete_schedule(message, ack, say, body):
+    # アクションを確認したことを即時で応答します
+    ack()
+    #チャンネルにメッセージを送信
+    say(f"<@{body['user']['id']}> adelete new schedule")
+
+
+
+
 
 @app.action("button_click2")
 def action_button_click(body, ack, say):
@@ -85,8 +138,6 @@ def handle_message_events(body, logger):
 @app.message(re.compile(r'^<.*>'))
 def ask_who(say):
     say("all")
-
-
 
 
 
